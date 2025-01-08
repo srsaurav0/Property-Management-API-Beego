@@ -31,17 +31,17 @@ type PropertyDetailsResponse struct {
 		} `json:"Counts"`
 		EcoFriendly  bool   `json:"EcoFriendly"`
 		FeatureImage string `json:"FeatureImage"`
-		Image        struct {
-			Count  int      `json:"Count"`
-			Images []string `json:"Images"`
-		} `json:"Image"`
+		Image        *struct {
+			Count  int      `json:"Count,omitempty"`
+			Images []string `json:"Images,omitempty"`
+		} `json:"Image,omitempty"`
 		Price                  int                `json:"Price"`
 		PropertyName           string             `json:"PropertyName"`
 		PropertySlug           string             `json:"PropertySlug"`
 		PropertyType           string             `json:"PropertyType"`
 		PropertyTypeCategoryId string             `json:"PropertyTypeCategoryId"`
 		ReviewScore            int                `json:"ReviewScore"`
-		ReviewScores           map[string]float64 `json:"ReviewScores"`
+		ReviewScores           map[string]float64 `json:"ReviewScores,omitempty"`
 		RoomSize               float64            `json:"RoomSize"`
 		MinStay                int                `json:"MinStay"`
 		UpdatedAt              string             `json:"UpdatedAt"`
