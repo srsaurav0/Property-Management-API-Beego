@@ -5,12 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-)
 
-// const externalAPIBaseURL = "http://192.168.0.44:8085/dynamodb-s3-os"
+	"github.com/beego/beego/v2/server/web"
+)
 
 func FetchOSPropertyDetails(propertyId string) (structs.PropertyDetailsResponse, error) {
 	var transformedData structs.PropertyDetailsResponse
+
+	externalAPIBaseURL, err := web.AppConfig.String("externalAPIBaseURL")
+	if err != nil {
+		return transformedData, fmt.Errorf("failed to load external API URL from config: %w", err)
+	}
 
 	externalAPIURL := fmt.Sprintf("%s?propertyId=%s&languageCode=en", externalAPIBaseURL, propertyId)
 	resp, err := http.Get(externalAPIURL)
@@ -37,7 +42,6 @@ func transformOSData(originalData map[string]interface{}, transformedData *struc
 		return fmt.Errorf("invalid OS data")
 	}
 
-	// Check and assign each field with proper error handling and type assertion
 	if id, ok := osData["id"].(string); ok {
 		transformedData.ID = id
 	}
