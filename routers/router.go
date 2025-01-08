@@ -12,7 +12,7 @@ func init() {
 			web.NSRouter("/details/:propertyId", &controllers.PropertyDetailsController{}, "get:GetPropertyDetails"),
 			// web.NSRouter("/gallery/:propertyId", &controllers.PropertyImagesController{}, "get:PropertyImages"),
 		),
-		// web.NSRouter("/propertyList", &controllers.BulkPropertyFetchController{}, "get:BulkPropertyFetch"),
+		web.NSRouter("/propertyList", &controllers.BulkPropertyFetchController{}, "get:BulkPropertyFetch"),
 	)
 
 	web.AddNamespace(ns)
