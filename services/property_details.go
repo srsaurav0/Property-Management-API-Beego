@@ -37,16 +37,16 @@ func FetchPropertyDetails(propertyId string) (structs.PropertyDetailsResponse, e
 }
 
 func transformData(originalData map[string]interface{}, transformedData *structs.PropertyDetailsResponse) error {
-	osData, ok := originalData["S3"].(map[string]interface{})
+	s3Data, ok := originalData["S3"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("invalid OS data")
+		return fmt.Errorf("invalid S3 data")
 	}
 
-	transformedData.ID = osData["ID"].(string)
-	transformedData.Feed = int(osData["Feed"].(float64))
-	transformedData.Published = osData["Published"].(bool)
+	transformedData.ID = s3Data["ID"].(string)
+	transformedData.Feed = int(s3Data["Feed"].(float64))
+	transformedData.Published = s3Data["Published"].(bool)
 
-	geoInfo := osData["GeoInfo"].(map[string]interface{})
+	geoInfo := s3Data["GeoInfo"].(map[string]interface{})
 	for _, category := range geoInfo["Categories"].([]interface{}) {
 		cat := category.(map[string]interface{})
 		transformedData.GeoInfo.Categories = append(transformedData.GeoInfo.Categories, struct {
@@ -79,7 +79,7 @@ func transformData(originalData map[string]interface{}, transformedData *structs
 	transformedData.GeoInfo.Lat = geoInfo["Lat"].(string)
 	transformedData.GeoInfo.Lng = geoInfo["Lng"].(string)
 
-	property := osData["Property"].(map[string]interface{})
+	property := s3Data["Property"].(map[string]interface{})
 	transformedData.Property.Amenities = func() map[string]string {
 		amenities := map[string]string{}
 		for k, v := range property["Amenities"].(map[string]interface{}) {
@@ -95,10 +95,24 @@ func transformData(originalData map[string]interface{}, transformedData *structs
 
 	transformedData.Property.EcoFriendly = property["EcoFriendly"].(bool)
 	transformedData.Property.FeatureImage = property["FeatureImage"].(string)
-	image := property["Image"].(map[string]interface{})
-	transformedData.Property.Image.Count = int(image["Count"].(float64))
-	for _, img := range image["Images"].([]interface{}) {
-		transformedData.Property.Image.Images = append(transformedData.Property.Image.Images, img.(string))
+
+	// Handle Image struct as a pointer
+	if image, ok := property["Image"].(map[string]interface{}); ok {
+		if len(image) > 0 {
+			imgStruct := &struct {
+				Count  int      `json:"Count,omitempty"`
+				Images []string `json:"Images,omitempty"`
+			}{
+				Count:  int(image["Count"].(float64)),
+				Images: make([]string, len(image["Images"].([]interface{}))),
+			}
+			for i, img := range image["Images"].([]interface{}) {
+				imgStruct.Images[i] = img.(string)
+			}
+			transformedData.Property.Image = imgStruct
+		} else {
+			transformedData.Property.Image = nil
+		}
 	}
 
 	transformedData.Property.Price = int(property["Price"].(float64))
@@ -118,7 +132,7 @@ func transformData(originalData map[string]interface{}, transformedData *structs
 	transformedData.Property.MinStay = int(property["MinStay"].(float64))
 	transformedData.Property.UpdatedAt = property["UpdatedAt"].(string)
 
-	partner := osData["Partner"].(map[string]interface{})
+	partner := s3Data["Partner"].(map[string]interface{})
 	transformedData.Partner.ID = partner["ID"].(string)
 	for _, archived := range partner["Archived"].([]interface{}) {
 		transformedData.Partner.Archived = append(transformedData.Partner.Archived, archived.(string))

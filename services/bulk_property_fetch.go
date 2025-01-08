@@ -149,14 +149,15 @@ func transformOSData(originalData map[string]interface{}, transformedData *struc
 		transformedData.Property.ReviewScore = int(reviewScoreGeneral)
 	}
 
-	if reviewScores, ok := osData["review_scores"].(map[string]interface{}); ok {
-		transformedData.Property.ReviewScores = make(map[string]float64)
-		for k, v := range reviewScores {
-			if score, ok := v.(float64); ok {
-				transformedData.Property.ReviewScores[k] = score
-			}
-		}
-	}
+	// Remove the handling of review scores
+	// if reviewScores, ok := osData["review_scores"].(map[string]interface{}); ok {
+	// 	transformedData.Property.ReviewScores = make(map[string]float64)
+	// 	for k, v := range reviewScores {
+	// 		if score, ok := v.(float64); ok {
+	// 			transformedData.Property.ReviewScores[k] = score
+	// 		}
+	// 	}
+	// }
 
 	if roomSizeSqft, ok := osData["room_size_sqft"].(float64); ok {
 		transformedData.Property.RoomSize = roomSizeSqft
