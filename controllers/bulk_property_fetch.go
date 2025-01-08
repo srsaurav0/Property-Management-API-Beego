@@ -33,7 +33,7 @@ func (c *BulkPropertyFetchController) BulkPropertyFetch() {
 		wg.Add(1)
 		go func(i int, id string) {
 			defer wg.Done()
-			data, err := services.FetchPropertyDetails(id)
+			data, err := services.FetchOSPropertyDetails(id)
 			if err != nil {
 				log.Printf("Error fetching details for property ID %s: %v", id, err)
 				return
