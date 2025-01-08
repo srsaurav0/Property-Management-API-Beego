@@ -1,3 +1,4 @@
 *.conf
 beego-api-service
 go.sum
+*.json
