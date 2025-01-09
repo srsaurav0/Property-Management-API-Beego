@@ -2,7 +2,6 @@ package services
 
 import (
 	"beego-api-service/structs"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,152 +11,281 @@ import (
 )
 
 func TestFetchOSPropertyDetails(t *testing.T) {
-	// Create mock server
-	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Verify request parameters
-		assert.Equal(t, "GET", r.Method)
-		assert.Equal(t, "test123", r.URL.Query().Get("propertyId"))
-		assert.Equal(t, "en", r.URL.Query().Get("languageCode"))
-
-		// Return mock response
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"OS": map[string]interface{}{
-				"id":        "test123",
-				"feed":      float64(1),
-				"published": true,
-				"categories": `[{
-					"Name": "Test Category",
-					"Slug": "test-category",
-					"Type": "location",
-					"Display": ["Display 1", "Display 2"],
-					"LocationID": "loc_123"
-				}]`,
-				"city":         "Test City",
-				"country":      "Test Country",
-				"country_code": "TC",
-				"display":      "Test Display",
-				"location_id":  "loc_123",
-				"state_abbr":   "TS",
-				"lonlat": map[string]interface{}{
-					"coordinates": []interface{}{float64(67.890), float64(12.345)},
-				},
-				"amenity_categories": []interface{}{"WiFi", "Pool"},
-				"bedroom_count":      float64(2),
-				"bathroom_count":     float64(1),
-				"number_of_review":   float64(10),
-				"occupancy":          float64(4),
-				"property_flags": map[string]interface{}{
-					"eco_friendly": true,
-				},
-				"feature_image":          "test_image.jpg",
-				"usd_price":              float64(150),
-				"property_name":          "Test Property",
-				"property_slug":          "test-property",
-				"property_type":          "Apartment",
-				"property_type_category": "apt_123",
-				"review_score_general":   float64(85),
-				"room_size_sqft":         float64(45.5),
-				"min_stay":               float64(2),
-				"updated_at":             "2024-01-09T12:00:00Z",
-				"owner_id":               "owner_123",
-				"hcom_id":                "hcom_123",
-				"brand_id":               "brand_123",
-				"feed_provider_url":      "https://example.com/property/123",
-				"unit_number":            "unit_123",
-				"cluster_id":             "cluster_1",
-				"archived":               []interface{}{"2023-12-01"},
-			},
-		})
-	}))
-	defer mockServer.Close()
-
-	// Set up test configuration
-	web.AppConfig.Set("externalAPIBaseURL", mockServer.URL)
-
 	tests := []struct {
-		name        string
-		propertyID  string
-		wantErr     bool
-		validateRes func(*testing.T, structs.PropertyDetailsResponse)
+		name           string
+		propertyID     string
+		mockResponse   string
+		expectedResult structs.PropertyDetailsResponse
+		expectError    bool
 	}{
 		{
-			name:       "successful fetch",
-			propertyID: "test123",
-			wantErr:    false,
-			validateRes: func(t *testing.T, res structs.PropertyDetailsResponse) {
-				// Validate basic fields
-				assert.Equal(t, "test123", res.ID)
-				assert.Equal(t, 1, res.Feed)
-				assert.True(t, res.Published)
-
-				// Validate GeoInfo
-				assert.Equal(t, "Test City", res.GeoInfo.City)
-				assert.Equal(t, "Test Country", res.GeoInfo.Country)
-				assert.Equal(t, "TC", res.GeoInfo.CountryCode)
-				assert.Equal(t, "Test Display", res.GeoInfo.Display)
-				assert.Equal(t, "loc_123", res.GeoInfo.LocationID)
-				assert.Equal(t, "TS", res.GeoInfo.StateAbbr)
-				assert.Equal(t, "12.345000", res.GeoInfo.Lat)
-				assert.Equal(t, "67.890000", res.GeoInfo.Lng)
-
-				// Validate Categories
-				assert.Len(t, res.GeoInfo.Categories, 1)
-				cat := res.GeoInfo.Categories[0]
-				assert.Equal(t, "Test Category", cat.Name)
-				assert.Equal(t, "test-category", cat.Slug)
-				assert.Equal(t, "location", cat.Type)
-				assert.Equal(t, []string{"Display 1", "Display 2"}, cat.Display)
-				assert.Equal(t, "loc_123", cat.LocationID)
-
-				// Validate Property
-				assert.Len(t, res.Property.Amenities, 2)
-				assert.Equal(t, 2, res.Property.Counts.Bedroom)
-				assert.Equal(t, 1, res.Property.Counts.Bathroom)
-				assert.Equal(t, 10, res.Property.Counts.Reviews)
-				assert.Equal(t, 4, res.Property.Counts.Occupancy)
-				assert.True(t, res.Property.EcoFriendly)
-				assert.Equal(t, "test_image.jpg", res.Property.FeatureImage)
-				assert.Equal(t, 150, res.Property.Price)
-				assert.Equal(t, "Test Property", res.Property.PropertyName)
-				assert.Equal(t, "test-property", res.Property.PropertySlug)
-				assert.Equal(t, "Apartment", res.Property.PropertyType)
-				assert.Equal(t, "apt_123", res.Property.PropertyTypeCategoryId)
-				assert.Equal(t, 85, res.Property.ReviewScore)
-				assert.Equal(t, 45.5, res.Property.RoomSize)
-				assert.Equal(t, 2, res.Property.MinStay)
-				assert.Equal(t, "2024-01-09T12:00:00Z", res.Property.UpdatedAt)
-
-				// Validate Partner
-				assert.Equal(t, "test123", res.Partner.ID)
-				assert.Equal(t, []string{"2023-12-01"}, res.Partner.Archived)
-				assert.Equal(t, "owner_123", res.Partner.OwnerID)
-				assert.Equal(t, "hcom_123", res.Partner.HcomID)
-				assert.Equal(t, "brand_123", res.Partner.BrandId)
-				assert.Equal(t, "https://example.com/property/123", res.Partner.URL)
-				assert.Equal(t, "unit_123", res.Partner.UnitNumber)
-				assert.Equal(t, "cluster_1", res.Partner.EpCluster)
+			name:       "Success with complete data",
+			propertyID: "HA-3213808988",
+			mockResponse: `{
+                "OS": {
+                    "amenity_categories": [
+                        "Air Conditioner",
+                        "Balcony/Terrace",
+                        "Bedding/Linens",
+                        "Child Friendly",
+                        "Kitchen",
+                        "Laundry",
+                        "Pool",
+                        "View",
+                        "Ocean View",
+                        "Sports/Activities",
+                        "Wellness Facilities",
+                        "Spa",
+                        "Guest Services",
+                        "Entertainment"
+                    ],
+                    "archived": ["VRBO", "EP", "HC"],
+                    "bathroom_count": 3,
+                    "bedroom_count": 3,
+                    "brand_id": "321",
+                    "categories": "[{\"LocationID\": \"117\", \"Name\": \"Mexico\", \"Type\": \"country\", \"Slug\": \"mexico\", \"Display\": [\"mexico\"]}, {\"LocationID\": \"11116\", \"Name\": \"Baja California Sur\", \"Type\": \"state\", \"Slug\": \"mexico/baja-california-sur\", \"Display\": [\"mexico\", \"baja-california-sur\"]}, {\"LocationID\": \"180032\", \"Name\": \"Los Cabos\", \"Type\": \"region\", \"Slug\": \"mexico/baja-california-sur/los-cabos\", \"Display\": [\"mexico\", \"baja-california-sur\", \"los-cabos\"]}, {\"LocationID\": \"6349690\", \"Name\": \"El Tezal\", \"Type\": \"city\", \"Slug\": \"mexico/baja-california-sur/cabo-san-lucas/el-tezal\", \"Display\": [\"mexico\", \"baja-california-sur\", \"cabo-san-lucas\", \"el-tezal\"]}]",
+                    "city": "El Tezal",
+                    "cluster_id": "c002",
+                    "country": "Mexico",
+                    "country_code": "MX",
+                    "display": "El Tezal, Cabo San Lucas, Baja California Sur, Mexico",
+                    "feature_image": "https://images.trvl-media.com/lodging/102000000/101740000/101739900/101739817/7c032e5f.jpg?impolicy=fcrop&w=1000&h=666&quality=medium",
+                    "feed": 12,
+                    "feed_provider_url": "https://www.vrbo.com/search?selected=101739817&regionId=6349690",
+                    "hcom_id": "3256674144",
+                    "id": "HA-3213808988",
+                    "location_id": "6349690",
+                    "lonlat": {
+                        "coordinates": [-109.88175, 22.907337]
+                    },
+                    "min_stay": 1,
+                    "number_of_review": 1,
+                    "occupancy": 8,
+                    "owner_id": "101739817",
+                    "property_flags": {
+                        "eco_friendly": false
+                    },
+                    "property_name": "Brand New Luxury Penthouse w/Jacuzzi",
+                    "property_slug": "brand-new-luxury-penthouse-w-jacuzzi",
+                    "property_type": "Apartment",
+                    "property_type_category": "Apartment",
+                    "published": true,
+                    "review_score_general": 5,
+                    "room_size_sqft": 3121,
+                    "unit_number": "4383133",
+                    "updated_at": "2024-05-03T11:46:19.189256+00:00",
+                    "usd_price": 170
+                }
+            }`,
+			expectedResult: structs.PropertyDetailsResponse{
+				ID:        "HA-3213808988",
+				Feed:      12,
+				Published: true,
+				GeoInfo: struct {
+					Categories []struct {
+						Name       string   `json:"Name"`
+						Slug       string   `json:"Slug"`
+						Type       string   `json:"Type"`
+						Display    []string `json:"Display"`
+						LocationID string   `json:"LocationID"`
+					} `json:"Categories"`
+					City        string `json:"City"`
+					Country     string `json:"Country"`
+					CountryCode string `json:"CountryCode"`
+					Display     string `json:"Display"`
+					LocationID  string `json:"LocationID"`
+					StateAbbr   string `json:"StateAbbr"`
+					Lat         string `json:"Lat"`
+					Lng         string `json:"Lng"`
+				}{
+					Categories: []struct {
+						Name       string   `json:"Name"`
+						Slug       string   `json:"Slug"`
+						Type       string   `json:"Type"`
+						Display    []string `json:"Display"`
+						LocationID string   `json:"LocationID"`
+					}{
+						{
+							Name:       "Mexico",
+							Slug:       "mexico",
+							Type:       "country",
+							Display:    []string{"mexico"},
+							LocationID: "117",
+						},
+						{
+							Name:       "Baja California Sur",
+							Slug:       "mexico/baja-california-sur",
+							Type:       "state",
+							Display:    []string{"mexico", "baja-california-sur"},
+							LocationID: "11116",
+						},
+						{
+							Name:       "Los Cabos",
+							Slug:       "mexico/baja-california-sur/los-cabos",
+							Type:       "region",
+							Display:    []string{"mexico", "baja-california-sur", "los-cabos"},
+							LocationID: "180032",
+						},
+						{
+							Name:       "El Tezal",
+							Slug:       "mexico/baja-california-sur/cabo-san-lucas/el-tezal",
+							Type:       "city",
+							Display:    []string{"mexico", "baja-california-sur", "cabo-san-lucas", "el-tezal"},
+							LocationID: "6349690",
+						},
+					},
+					City:        "El Tezal",
+					Country:     "Mexico",
+					CountryCode: "MX",
+					Display:     "El Tezal, Cabo San Lucas, Baja California Sur, Mexico",
+					LocationID:  "6349690",
+					StateAbbr:   "",
+					Lat:         "22.907337",
+					Lng:         "-109.881750",
+				},
+				Property: struct {
+					Amenities map[string]string `json:"Amenities"`
+					Counts    struct {
+						Bedroom   int `json:"Bedroom"`
+						Bathroom  int `json:"Bathroom"`
+						Reviews   int `json:"Reviews"`
+						Occupancy int `json:"Occupancy"`
+					} `json:"Counts"`
+					EcoFriendly  bool   `json:"EcoFriendly"`
+					FeatureImage string `json:"FeatureImage"`
+					Image        *struct {
+						Count  int      `json:"Count,omitempty"`
+						Images []string `json:"Images,omitempty"`
+					} `json:"Image,omitempty"`
+					Price                  int                `json:"Price"`
+					PropertyName           string             `json:"PropertyName"`
+					PropertySlug           string             `json:"PropertySlug"`
+					PropertyType           string             `json:"PropertyType"`
+					PropertyTypeCategoryId string             `json:"PropertyTypeCategoryId"`
+					ReviewScore            int                `json:"ReviewScore"`
+					ReviewScores           map[string]float64 `json:"ReviewScores,omitempty"`
+					RoomSize               float64            `json:"RoomSize"`
+					MinStay                int                `json:"MinStay"`
+					UpdatedAt              string             `json:"UpdatedAt"`
+				}{
+					Amenities: map[string]string{
+						"1":  "Air Conditioner",
+						"2":  "Balcony/Terrace",
+						"3":  "Bedding/Linens",
+						"4":  "Child Friendly",
+						"5":  "Kitchen",
+						"6":  "Laundry",
+						"7":  "Pool",
+						"8":  "View",
+						"9":  "Ocean View",
+						"10": "Sports/Activities",
+						"11": "Wellness Facilities",
+						"12": "Spa",
+						"13": "Guest Services",
+						"14": "Entertainment",
+					},
+					Counts: struct {
+						Bedroom   int `json:"Bedroom"`
+						Bathroom  int `json:"Bathroom"`
+						Reviews   int `json:"Reviews"`
+						Occupancy int `json:"Occupancy"`
+					}{
+						Bedroom:   3,
+						Bathroom:  3,
+						Reviews:   1,
+						Occupancy: 8,
+					},
+					EcoFriendly:            false,
+					FeatureImage:           "https://images.trvl-media.com/lodging/102000000/101740000/101739900/101739817/7c032e5f.jpg?impolicy=fcrop&w=1000&h=666&quality=medium",
+					Price:                  170,
+					PropertyName:           "Brand New Luxury Penthouse w/Jacuzzi",
+					PropertySlug:           "brand-new-luxury-penthouse-w-jacuzzi",
+					PropertyType:           "Apartment",
+					PropertyTypeCategoryId: "Apartment",
+					ReviewScore:            5,
+					RoomSize:               3121,
+					MinStay:                1,
+					UpdatedAt:              "2024-05-03T11:46:19.189256+00:00",
+				},
+				Partner: struct {
+					ID         string   `json:"ID"`
+					Archived   []string `json:"Archived"`
+					OwnerID    string   `json:"OwnerID"`
+					HcomID     string   `json:"HcomID"`
+					BrandId    string   `json:"BrandId"`
+					URL        string   `json:"URL"`
+					UnitNumber string   `json:"UnitNumber"`
+					EpCluster  string   `json:"EpCluster"`
+				}{
+					ID:         "HA-3213808988",
+					Archived:   []string{"VRBO", "EP", "HC"},
+					OwnerID:    "101739817",
+					HcomID:     "3256674144",
+					BrandId:    "321",
+					URL:        "https://www.vrbo.com/search?selected=101739817&regionId=6349690",
+					UnitNumber: "4383133",
+					EpCluster:  "c002",
+				},
 			},
+			expectError: false,
 		},
 		{
-			name:       "empty property ID",
-			propertyID: "",
-			wantErr:    true,
+			name:       "Invalid OS data structure",
+			propertyID: "INVALID-ID",
+			mockResponse: `{
+                "OS": "invalid"
+            }`,
+			expectedResult: structs.PropertyDetailsResponse{},
+			expectError:    true,
+		},
+		{
+			name:         "Invalid JSON response",
+			propertyID:   "ERROR-ID",
+			mockResponse: `invalid json`,
+			expectError:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := FetchOSPropertyDetails(tt.propertyID)
-			if tt.wantErr {
-				assert.Error(t, err)
-				return
-			}
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "GET", r.Method)
+				assert.Contains(t, r.URL.String(), tt.propertyID)
+				assert.Contains(t, r.URL.String(), "languageCode=en")
 
-			assert.NoError(t, err)
-			if tt.validateRes != nil {
-				tt.validateRes(t, result)
+				w.Header().Set("Content-Type", "application/json")
+				w.Write([]byte(tt.mockResponse))
+			}))
+			defer server.Close()
+
+			web.AppConfig.Set("externalAPIBaseURL", server.URL)
+
+			result, err := FetchOSPropertyDetails(tt.propertyID)
+
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedResult, result)
 			}
 		})
 	}
+}
+
+func TestFetchOSPropertyDetailsHTTPError(t *testing.T) {
+	web.AppConfig.Set("externalAPIBaseURL", "http://invalid-url-that-will-fail")
+
+	result, err := FetchOSPropertyDetails("PROP123")
+
+	assert.Error(t, err)
+	assert.Empty(t, result)
+}
+
+func TestFetchOSPropertyDetailsConfigError(t *testing.T) {
+	web.AppConfig.Set("externalAPIBaseURL", "")
+
+	result, err := FetchOSPropertyDetails("PROP123")
+
+	assert.Error(t, err)
+	assert.Empty(t, result)
 }
