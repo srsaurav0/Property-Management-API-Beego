@@ -1,6 +1,5 @@
 *.conf
 beego-api-service
 go.sum
-go.mod
 *.json
 Property-Management-API-Beego
