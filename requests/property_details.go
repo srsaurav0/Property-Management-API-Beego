@@ -1,7 +1,8 @@
 package requests
 
 import (
-	"fmt"
+	"errors"
+	"log"
 
 	"github.com/beego/beego/v2/server/web"
 )
@@ -9,7 +10,8 @@ import (
 func GetPropertyID(c *web.Controller) (string, error) {
 	propertyId := c.Ctx.Input.Param(":propertyId")
 	if propertyId == "" {
-		return "", fmt.Errorf("property ID not provided")
+		log.Printf("property ID not provided")
+		return "", errors.New("property ID not provided")
 	}
 	return propertyId, nil
 }

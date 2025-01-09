@@ -3,7 +3,9 @@ package services
 import (
 	"beego-api-service/structs"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/beego/beego/v2/server/web"
@@ -14,23 +16,27 @@ func FetchPropertyDetails(propertyId string) (structs.PropertyDetailsResponse, e
 
 	externalAPIBaseURL, err := web.AppConfig.String("externalAPIBaseURL")
 	if err != nil {
-		return transformedData, fmt.Errorf("failed to load external API URL from config: %w", err)
+		log.Printf("failed to load external API URL from config: %v", err)
+		return transformedData, err
 	}
 
 	externalAPIURL := fmt.Sprintf("%s?propertyId=%s&languageCode=en", externalAPIBaseURL, propertyId)
 	resp, err := http.Get(externalAPIURL)
 	if err != nil {
-		return transformedData, fmt.Errorf("HTTP request failed: %w", err)
+		log.Printf("HTTP request failed: %v", err)
+		return transformedData, err
 	}
 	defer resp.Body.Close()
 
 	var originalData map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&originalData); err != nil {
-		return transformedData, fmt.Errorf("failed to decode response: %w", err)
+		log.Printf("failed to decode response: %v", err)
+		return transformedData, err
 	}
 
 	if err := transformData(originalData, &transformedData); err != nil {
-		return transformedData, fmt.Errorf("failed to transform data: %w", err)
+		log.Printf("failed to transform data: %v", err)
+		return transformedData, err
 	}
 
 	return transformedData, nil
@@ -39,7 +45,8 @@ func FetchPropertyDetails(propertyId string) (structs.PropertyDetailsResponse, e
 func transformData(originalData map[string]interface{}, transformedData *structs.PropertyDetailsResponse) error {
 	s3Data, ok := originalData["S3"].(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("invalid S3 data")
+		log.Printf("invalid S3 data: expected map[string]interface{}, got %T", originalData["S3"])
+		return errors.New("invalid S3 data")
 	}
 
 	transformedData.ID = s3Data["ID"].(string)
@@ -96,7 +103,6 @@ func transformData(originalData map[string]interface{}, transformedData *structs
 	transformedData.Property.EcoFriendly = property["EcoFriendly"].(bool)
 	transformedData.Property.FeatureImage = property["FeatureImage"].(string)
 
-	// Handle Image struct as a pointer
 	if image, ok := property["Image"].(map[string]interface{}); ok {
 		if len(image) > 0 {
 			imgStruct := &struct {

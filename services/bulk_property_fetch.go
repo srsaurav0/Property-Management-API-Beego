@@ -3,7 +3,9 @@ package services
 import (
 	"beego-api-service/structs"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/beego/beego/v2/server/web"
@@ -12,25 +14,33 @@ import (
 func FetchOSPropertyDetails(propertyId string) (structs.PropertyDetailsResponse, error) {
 	var transformedData structs.PropertyDetailsResponse
 
+	// Load the external API base URL from the configuration
 	externalAPIBaseURL, err := web.AppConfig.String("externalAPIBaseURL")
 	if err != nil {
-		return transformedData, fmt.Errorf("failed to load external API URL from config: %w", err)
+		log.Printf("failed to load external API URL from config: %v", err)
+		return transformedData, err
 	}
 
+	// Construct the external API URL
 	externalAPIURL := fmt.Sprintf("%s?propertyId=%s&languageCode=en", externalAPIBaseURL, propertyId)
 	resp, err := http.Get(externalAPIURL)
 	if err != nil {
-		return transformedData, fmt.Errorf("HTTP request failed: %w", err)
+		log.Printf("HTTP request failed: %v", err)
+		return transformedData, err
 	}
 	defer resp.Body.Close()
 
+	// Decode the JSON response
 	var originalData map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&originalData); err != nil {
-		return transformedData, fmt.Errorf("failed to decode response: %w", err)
+		log.Printf("failed to decode response: %v", err)
+		return transformedData, err
 	}
 
+	// Transform the original data into the desired format
 	if err := transformOSData(originalData, &transformedData); err != nil {
-		return transformedData, fmt.Errorf("failed to transform data: %w", err)
+		log.Printf("failed to transform data: %v", err)
+		return transformedData, err
 	}
 
 	return transformedData, nil
@@ -149,16 +159,6 @@ func transformOSData(originalData map[string]interface{}, transformedData *struc
 		transformedData.Property.ReviewScore = int(reviewScoreGeneral)
 	}
 
-	// Remove the handling of review scores
-	// if reviewScores, ok := osData["review_scores"].(map[string]interface{}); ok {
-	// 	transformedData.Property.ReviewScores = make(map[string]float64)
-	// 	for k, v := range reviewScores {
-	// 		if score, ok := v.(float64); ok {
-	// 			transformedData.Property.ReviewScores[k] = score
-	// 		}
-	// 	}
-	// }
-
 	if roomSizeSqft, ok := osData["room_size_sqft"].(float64); ok {
 		transformedData.Property.RoomSize = roomSizeSqft
 	}
@@ -214,7 +214,8 @@ func parseCategories(osData map[string]interface{}, transformedData *structs.Pro
 	if categoriesJSON, ok := osData["categories"].(string); ok {
 		var categories []map[string]interface{}
 		if err := json.Unmarshal([]byte(categoriesJSON), &categories); err != nil {
-			return fmt.Errorf("failed to unmarshal categories: %w", err)
+			log.Printf("failed to unmarshal categories: %v", err)
+			return errors.New("failed to unmarshal categories")
 		}
 		for _, category := range categories {
 			transformedData.GeoInfo.Categories = append(transformedData.GeoInfo.Categories, struct {

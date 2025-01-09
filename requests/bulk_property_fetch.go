@@ -1,7 +1,8 @@
 package requests
 
 import (
-	"fmt"
+	"errors"
+	"log"
 	"strings"
 
 	"github.com/beego/beego/v2/server/web"
@@ -10,7 +11,8 @@ import (
 func GetPropertyIDs(c *web.Controller) ([]string, error) {
 	propertyIds := c.GetString("propertyIds")
 	if propertyIds == "" {
-		return nil, fmt.Errorf("no property IDs provided")
+		log.Printf("no property IDs provided")
+		return nil, errors.New("no property IDs provided")
 	}
 	ids := strings.Split(propertyIds, ",")
 	return ids, nil

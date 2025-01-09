@@ -18,10 +18,3 @@ func SendPropertyDetailsResponses(c *web.Controller, data []structs.PropertyDeta
 		}
 	}
 }
-
-// func SendErrorResponse(c *web.Controller, message string, status int) {
-//     c.Ctx.Output.SetStatus(status)
-//     if writeErr := c.Ctx.Output.Body([]byte(message)); writeErr != nil {
-//         log.Printf("Failed to write error response: %v", writeErr)
-//     }
-// }
