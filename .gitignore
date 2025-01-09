@@ -4,3 +4,5 @@ go.sum
 go.mod
 *.json
 Property-Management-API-Beego
+coverage.out
+coverage.html
