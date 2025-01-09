@@ -51,10 +51,21 @@ func FetchPropertyImages(propertyId string) (structs.ImagesResponse, error) {
 			label := img["label"].(string)
 			url := img["url"].(string)
 
-			if _, ok := transformedData[label]; !ok {
-				transformedData[label] = []string{}
+			// Extract confidence value
+			confidence, ok := img["confidence"].(float64)
+			if !ok {
+				// If confidence field doesn't exist or is not a number, skip this image
+				log.Printf("invalid or missing confidence value for image: %s", url)
+				continue
 			}
-			transformedData[label] = append(transformedData[label], url)
+
+			// Only add images with confidence > 95
+			if confidence > 95 {
+				if _, ok := transformedData[label]; !ok {
+					transformedData[label] = []string{}
+				}
+				transformedData[label] = append(transformedData[label], url)
+			}
 		}
 	}
 
