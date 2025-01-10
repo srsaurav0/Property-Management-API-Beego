@@ -14,8 +14,10 @@ func init() {
 		),
 		web.NSRouter("/propertyList", &controllers.BulkPropertyFetchController{}, "get:BulkPropertyFetch"),
 		web.NSNamespace("/user",
-			web.NSRouter("/", &controllers.CreateController{}, "post:CreateUser"),
-			// web.NSRouter("/:identifier", &controllers.UserController{}, "get:Get;put:Update;delete:Delete"),
+			web.NSRouter("/", &controllers.UserController{}, "post:CreateUser"),
+			web.NSRouter("/:identifier", &controllers.UserController{}, "get:GetUser"),
+			web.NSRouter("/:identifier", &controllers.UserController{}, "put:UpdateUser"),
+			web.NSRouter("/:identifier", &controllers.UserController{}, "delete:DeleteUser"),
 		),
 	)
 
