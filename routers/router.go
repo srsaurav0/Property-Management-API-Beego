@@ -13,6 +13,10 @@ func init() {
 			web.NSRouter("/gallery/:propertyId", &controllers.PropertyImagesController{}, "get:GetPropertyImages"),
 		),
 		web.NSRouter("/propertyList", &controllers.BulkPropertyFetchController{}, "get:BulkPropertyFetch"),
+		web.NSNamespace("/user",
+			web.NSRouter("/", &controllers.CreateController{}, "post:CreateUser"),
+			// web.NSRouter("/:identifier", &controllers.UserController{}, "get:Get;put:Update;delete:Delete"),
+		),
 	)
 
 	web.AddNamespace(ns)
