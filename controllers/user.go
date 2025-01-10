@@ -19,6 +19,13 @@ func (c *UserController) Prepare() {
 	c.userService = services.NewUserService()
 }
 
+// @Title Create User
+// @Description Create a new user
+// @Param   body        body   validation.CreateUserRequest  true  "User information"
+// @Success 201 {object} responses.StandardResponse "User created successfully"
+// @Failure 400 {object} responses.StandardResponse "Bad Request"
+// @Failure 500 {object} responses.StandardResponse "Internal Server Error"
+// @router / [post]
 func (c *UserController) CreateUser() {
 	// Read the body using ioutil
 	body, err := io.ReadAll(c.Ctx.Request.Body)
@@ -58,6 +65,13 @@ func (c *UserController) CreateUser() {
 	c.HandleSuccess(http.StatusCreated, user, "User created successfully")
 }
 
+// @Title Get User
+// @Description Get user by ID or email
+// @Param   identifier  path    string  true  "User ID or email"
+// @Success 200 {object} responses.StandardResponse "User retrieved successfully"
+// @Failure 404 {object} responses.StandardResponse "User not found"
+// @Failure 500 {object} responses.StandardResponse "Internal Server Error"
+// @router /:identifier [get]
 func (c *UserController) GetUser() {
 	identifier := c.Ctx.Input.Param(":identifier")
 	if identifier == "" {
@@ -78,6 +92,15 @@ func (c *UserController) GetUser() {
 	c.HandleSuccess(http.StatusOK, user, "User retrieved successfully")
 }
 
+// @Title Update User
+// @Description Update user by ID or email
+// @Param   identifier  path    string  true  "User ID or email"
+// @Param   body        body    validation.UpdateUserRequest  true  "User information to update"
+// @Success 200 {object} responses.StandardResponse "User updated successfully"
+// @Failure 400 {object} responses.StandardResponse "Bad Request"
+// @Failure 404 {object} responses.StandardResponse "User not found"
+// @Failure 500 {object} responses.StandardResponse "Internal Server Error"
+// @router /:identifier [put]
 func (c *UserController) UpdateUser() {
 	identifier := c.Ctx.Input.Param(":identifier")
 	if identifier == "" {
@@ -131,6 +154,13 @@ func (c *UserController) UpdateUser() {
 	c.HandleSuccess(http.StatusOK, updatedUser, "User updated successfully")
 }
 
+// @Title Delete User
+// @Description Delete user by ID or email
+// @Param   identifier  path    string  true  "User ID or email"
+// @Success 200 {object} responses.StandardResponse "User deleted successfully"
+// @Failure 404 {object} responses.StandardResponse "User not found"
+// @Failure 500 {object} responses.StandardResponse "Internal Server Error"
+// @router /:identifier [delete]
 func (c *UserController) DeleteUser() {
 	identifier := c.Ctx.Input.Param(":identifier")
 	if identifier == "" {
