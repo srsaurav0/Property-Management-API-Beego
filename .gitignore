@@ -1,8 +1,13 @@
-*.conf
-beego-api-service
+# Application files
 go.sum
 go.mod
-*.json
 Property-Management-API-Beego
+
+# Test coverage file
 coverage.out
 coverage.html
+
+# Environment and Configuration files
+*.conf
+.env
+*.log
