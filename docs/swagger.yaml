@@ -1,0 +1,189 @@
+definitions:
+  responses.InternalServerErrorResponse:
+    properties:
+      code:
+        description: |-
+          @Description HTTP status code
+          @Example 500
+        example: 500
+        type: integer
+      data:
+        description: '@Description Response data'
+      message:
+        description: |-
+          @Description Response message
+          @Example "Internal Server Error"
+        example: Operation failed
+        type: string
+    type: object
+  responses.StandardResponse:
+    description: Standard API response format
+    properties:
+      code:
+        description: |-
+          @Description HTTP status code
+          @Example 200
+        example: 200
+        type: integer
+      data:
+        description: '@Description Response data'
+      message:
+        description: |-
+          @Description Response message
+          @Example "Operation successful"
+        example: Operation successful
+        type: string
+    type: object
+  responses.UserNotFoundResponse:
+    properties:
+      code:
+        description: |-
+          @Description HTTP status code
+          @Example 404
+        example: 404
+        type: integer
+      data:
+        description: '@Description Response data'
+      message:
+        description: |-
+          @Description Response message
+          @Example "Operation failed"
+        example: Operation failed
+        type: string
+    type: object
+  validation.CreateUserRequest:
+    properties:
+      age:
+        description: |-
+          @Description The age of the user
+          @Required
+          @Minimum 0
+        type: integer
+      email:
+        description: |-
+          @Description The email address of the user
+          @Required
+          @Pattern [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}
+        type: string
+      name:
+        description: |-
+          @Description The name of the user
+          @Required
+        type: string
+    type: object
+  validation.UpdateUserRequest:
+    properties:
+      age:
+        description: |-
+          @Description The age of the user
+          @Required
+          @Minimum 0
+        type: integer
+      name:
+        description: |-
+          @Description The name of the user
+          @Required
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /v1/api/user:
+    post:
+      description: Create a new user
+      parameters:
+      - description: User information
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validation.CreateUserRequest'
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/responses.StandardResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.StandardResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.StandardResponse'
+  /v1/api/user/{identifier}:
+    delete:
+      description: Delete user by ID or email
+      parameters:
+      - description: User ID or email
+        in: path
+        name: identifier
+        required: true
+        type: string
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            $ref: '#/definitions/responses.StandardResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/responses.UserNotFoundResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.InternalServerErrorResponse'
+    get:
+      description: Get user by ID or email
+      parameters:
+      - description: User ID or email
+        example: '"1"'
+        in: path
+        name: identifier
+        required: true
+        type: string
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            $ref: '#/definitions/responses.StandardResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/responses.UserNotFoundResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.InternalServerErrorResponse'
+    put:
+      description: Update user by ID or email
+      parameters:
+      - description: User ID or email
+        in: path
+        name: identifier
+        required: true
+        type: string
+      - description: User information to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/validation.UpdateUserRequest'
+      responses:
+        "200":
+          description: User updated successfully
+          schema:
+            $ref: '#/definitions/responses.StandardResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.StandardResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/responses.UserNotFoundResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.InternalServerErrorResponse'
+swagger: "2.0"
