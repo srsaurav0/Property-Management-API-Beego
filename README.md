@@ -144,6 +144,9 @@ docker-compose up --build
 
 ## API Description and Usage
 
+### Swagger Implementation
+- Go to `http://localhost:8080/swagger/index.html` to use the Swagger UI for GET, POST, DELETE and PUT operations.
+
 ### Get Property Details 
 
 **Endpoint:** GET /v1/api/property/details/:propertyId (e.g. HG-72485269838878)
