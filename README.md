@@ -67,7 +67,7 @@ Beego API Service is a web application built using the [Beego](https://beego.me/
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/srsaurav0/Property-Management-API-Beego.git
+git clone -b features/user https://github.com/srsaurav0/Property-Management-API-Beego.git
 cd Property-Management-API-Beego
 ```
 
@@ -110,8 +110,12 @@ go mod tidy
    appname = beego-api-service
    httpport = 8080
    runmode = dev
+   enabledocs = true
 
    externalAPIBaseURL = "http://192.168.0.44:8085/dynamodb-s3-os"
+
+   [dev]
+   sqlconn = "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
    ```
 3. Create a file named ***.env*** at the root directory.
 4. Enter these configurations inside that directory.
