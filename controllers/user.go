@@ -1,4 +1,8 @@
-// controllers/user.go
+// @Title User API
+// @Description User management API
+// @Version 1.0
+// @Contact.email support@example.com
+// @BasePath /v1/api/user
 package controllers
 
 import (
@@ -19,13 +23,14 @@ func (c *UserController) Prepare() {
 	c.userService = services.NewUserService()
 }
 
+// Additional controller annotations for CreateUser method:
 // @Title Create User
 // @Description Create a new user
-// @Param   body        body   validation.CreateUserRequest  true  "User information"
+// @Param   body        body    validation.CreateUserRequest  true  "User information"
 // @Success 201 {object} responses.StandardResponse "User created successfully"
 // @Failure 400 {object} responses.StandardResponse "Bad Request"
 // @Failure 500 {object} responses.StandardResponse "Internal Server Error"
-// @router / [post]
+// @Router /v1/api/user [post]
 func (c *UserController) CreateUser() {
 	// Read the body using ioutil
 	body, err := io.ReadAll(c.Ctx.Request.Body)
@@ -67,11 +72,11 @@ func (c *UserController) CreateUser() {
 
 // @Title Get User
 // @Description Get user by ID or email
-// @Param   identifier  path    string  true  "User ID or email"
+// @Param   identifier  path    string  true  "User ID or email" example("1")
 // @Success 200 {object} responses.StandardResponse "User retrieved successfully"
-// @Failure 404 {object} responses.StandardResponse "User not found"
-// @Failure 500 {object} responses.StandardResponse "Internal Server Error"
-// @router /:identifier [get]
+// @Failure 404 {object} responses.UserNotFoundResponse "User not found"
+// @Failure 500 {object} responses.InternalServerErrorResponse "Internal Server Error"
+// @router /v1/api/user/{identifier} [get]
 func (c *UserController) GetUser() {
 	identifier := c.Ctx.Input.Param(":identifier")
 	if identifier == "" {
@@ -98,9 +103,9 @@ func (c *UserController) GetUser() {
 // @Param   body        body    validation.UpdateUserRequest  true  "User information to update"
 // @Success 200 {object} responses.StandardResponse "User updated successfully"
 // @Failure 400 {object} responses.StandardResponse "Bad Request"
-// @Failure 404 {object} responses.StandardResponse "User not found"
-// @Failure 500 {object} responses.StandardResponse "Internal Server Error"
-// @router /:identifier [put]
+// @Failure 404 {object} responses.UserNotFoundResponse "User not found"
+// @Failure 500 {object} responses.InternalServerErrorResponse "Internal Server Error"
+// @router /v1/api/user/{identifier} [put]
 func (c *UserController) UpdateUser() {
 	identifier := c.Ctx.Input.Param(":identifier")
 	if identifier == "" {
@@ -158,9 +163,9 @@ func (c *UserController) UpdateUser() {
 // @Description Delete user by ID or email
 // @Param   identifier  path    string  true  "User ID or email"
 // @Success 200 {object} responses.StandardResponse "User deleted successfully"
-// @Failure 404 {object} responses.StandardResponse "User not found"
-// @Failure 500 {object} responses.StandardResponse "Internal Server Error"
-// @router /:identifier [delete]
+// @Failure 404 {object} responses.UserNotFoundResponse "User not found"
+// @Failure 500 {object} responses.InternalServerErrorResponse "Internal Server Error"
+// @router /v1/api/user/{identifier} [delete]
 func (c *UserController) DeleteUser() {
 	identifier := c.Ctx.Input.Param(":identifier")
 	if identifier == "" {

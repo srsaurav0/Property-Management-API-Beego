@@ -23,12 +23,24 @@ func (b *BaseController) HandleError(statusCode int, message string, err error) 
 }
 
 // Common error handling methods
-func (b *BaseController) HandleBadRequest(message string, err error) {
-	b.HandleError(http.StatusBadRequest, message, err)
+func (c *BaseController) HandleBadRequest(message string, err error) {
+	c.Data["json"] = map[string]interface{}{
+		"success": false,
+		"message": message,
+		"error":   err.Error(),
+	}
+	c.Ctx.Output.SetStatus(http.StatusBadRequest)
+	c.ServeJSON()
 }
 
-func (b *BaseController) HandleInternalServerError(message string, err error) {
-	b.HandleError(http.StatusInternalServerError, message, err)
+func (c *BaseController) HandleInternalServerError(message string, err error) {
+	c.Data["json"] = map[string]interface{}{
+		"success": false,
+		"message": message,
+		"error":   err.Error(),
+	}
+	c.Ctx.Output.SetStatus(http.StatusInternalServerError)
+	c.ServeJSON()
 }
 
 func (b *BaseController) HandleUnauthorized(message string, err error) {
@@ -39,8 +51,14 @@ func (b *BaseController) HandleForbidden(message string, err error) {
 	b.HandleError(http.StatusForbidden, message, err)
 }
 
-func (b *BaseController) HandleNotFound(message string, err error) {
-	b.HandleError(http.StatusNotFound, message, err)
+func (c *BaseController) HandleNotFound(message string, err error) {
+	c.Data["json"] = map[string]interface{}{
+		"success": false,
+		"message": message,
+		"error":   err.Error(),
+	}
+	c.Ctx.Output.SetStatus(http.StatusNotFound)
+	c.ServeJSON()
 }
 
 // HandleSuccess handles successful responses
