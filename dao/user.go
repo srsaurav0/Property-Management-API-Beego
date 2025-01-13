@@ -38,16 +38,16 @@ func (d *userDAO) Create(user *models.User) error {
 // Implement other DAO methods as needed
 func (d *userDAO) GetByIdentifier(identifier string) (*models.User, error) {
 	user := &models.User{}
+	var err error
 
 	// Try to parse as ID first
-	if id, err := strconv.ParseInt(identifier, 10, 64); err == nil {
+	if id, parseErr := strconv.ParseInt(identifier, 10, 64); parseErr == nil {
 		err = d.orm.QueryTable(user).Filter("id", id).One(user)
 	} else {
 		// Try email
 		err = d.orm.QueryTable(user).Filter("email", identifier).One(user)
 	}
 
-	var err error
 	if err == orm.ErrNoRows {
 		return nil, fmt.Errorf("user not found")
 	}
