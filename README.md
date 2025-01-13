@@ -16,17 +16,37 @@ Beego API Service is a web application built using the [Beego](https://beego.me/
 
 ## Features
 
-### 1. Get Property Details
+### Property APIs
 
-**Description:** Fetches details of a property based on the provided property ID.
+1. **Get Property Details**
 
-### 2. Get Bulk Property Details
+   **Description:** Fetches details of a property based on the provided property ID.
 
-**Description:** Fetches details of a number of properties based on the provided property IDs.
+2. **Get Bulk Property Details**
 
-### 3. Get Property Images
+   **Description:** Fetches details of a number of properties based on the provided property IDs.
 
-**Description:** Fetches images of a property based on the provided property ID. Images are sorted by their ***labels***.
+3. **Get Property Images**
+
+   **Description:** Fetches images of a property based on the provided property ID. Images are sorted by their ***labels***.
+
+### User APIs
+
+1. **Create User**
+
+   **Description:** Creates a user in PostgreSQL database.
+
+2. **Get User**
+
+   **Description:** Fetches details of a user from PostgreSQL database.
+
+3. **Update User**
+
+   **Description:** Updates name or age of a user in PostgreSQL database.
+
+4. **Delete User**
+
+   **Description:** Delete data of a user from PostgreSQL database.
 
 ---
 
@@ -38,6 +58,8 @@ Beego API Service is a web application built using the [Beego](https://beego.me/
 - Beego v2.3.4
   - Run `bee version` to check if Beego is installed in your system. If not, then install it and after that, go forward.
   - Instructions are provided in the [Beego Setup](#beego-setup) section for Beego Installation.
+- Docker Version 27.4.1
+- Docker Compose Version 2.30.1
 
 ---
 
@@ -82,9 +104,8 @@ go mod tidy
 ```
 
 ### Configuration
-1. Create a folder named **conf** at the root directory. 
-2. Create a file named **app.conf** inside that directory.
-3. Enter these configurations inside that directory.
+1. Create a file named **app.conf** inside the ***conf*** directory.
+2. Enter these configurations inside that directory.
    ```bash
    appname = beego-api-service
    httpport = 8080
@@ -92,12 +113,30 @@ go mod tidy
 
    externalAPIBaseURL = "http://192.168.0.44:8085/dynamodb-s3-os"
    ```
+3. Create a file named ***.env*** at the root directory.
+4. Enter these configurations inside that directory.
+   ```bash
+   # Database Configuration
+   DB_USER=postgres
+   DB_PASSWORD=password
+   DB_NAME=db
+   DB_HOST=postgres
+   DB_PORT=5432
+
+   # App Configuration
+   APP_PORT=8080
+
+   # pgAdmin Configuration
+   PGADMIN_EMAIL=admin@admin.com
+   PGADMIN_PASSWORD=admin
+   PGADMIN_PORT=5050
+   ```
 
 ### Run the Application
 
 Start the server:
 ```bash
-bee run
+docker-compose up --build
 ```
 
 ---
@@ -155,6 +194,76 @@ This endpoint will:
 - Enter the url: *`http://localhost:8080/v1/api/property/gallery/:propertyId`*
 - Replace `:propertyId` with a valid property id. For example: `BC-4672180`.
 - Press the `Send` button to generate the response.
+
+### CREATE USER
+
+**Endpoint:** POST http://localhost:8080/v1/api/user/
+
+**Description:**
+This endpoint will:
+- Create a user in PostgreSQL database.
+- Store the `name`, `email` and `age` of the user.
+
+**Usage:**
+- Open postman app and create a new ***POST*** request setup.
+- Enter the url: *`http://localhost:8080/v1/api/user`*
+- In the body section, write the name, email and age of the user in json format. An example is given below:
+```json
+{
+  "name":"John Doe",
+  "age":25,
+  "email":"john.doe@example.com"
+}
+```
+
+### GET USER
+
+**Endpoint:** GET http://localhost:8080/v1/api/user/:identifier (Replace identifier with `id` or `email`)
+
+**Description:**
+This endpoint will:
+- Get the user with similar `id` or `email` from PostgreSQL database.
+- Show the `id`, `name`, `email` and `age` of the user.
+
+**Usage:**
+- Open postman app and create a new ***GET*** request setup.
+- Enter the url: *`http://localhost:8080/api/v1/users/(id/email)`*
+- Replace `(id/email)` with the desired `id` or `email`.
+
+### UPDATE USER
+
+**Endpoint:** PUT http://localhost:8080/v1/api/user/:identifier (Replace identifier with `id` or `email`)
+
+**Description:**
+This endpoint will:
+- Update a user in PostgreSQL database.
+- Update the `name` or `age` or both of the user.
+
+**Usage:**
+- Open postman app and create a new ***POST*** request setup.
+- Enter the url: *`http://localhost:8080/v1/api/user/(id/email)`*
+- Replace `(id/email)` with the desired `id` or `email`.
+- In the body section, write the write the update `name` or `age` or both of the user in json format. An example is given below:
+```json
+{
+  "name":"John Doe",
+  "age":30,
+}
+```
+
+### DELETE USER
+
+**Endpoint:** DELETE http://localhost:8080/v1/api/user/:identifier (Replace identifier with `id` or `email`)
+
+**Description:**
+This endpoint will:
+- Delete a user from PostgreSQL database.
+
+**Usage:**
+- Open postman app and create a new ***DELETE*** request setup.
+- Enter the url: *`http://localhost:8080/v1/api/user/(id/email)`*
+- Replace `(id/email)` with the desired `id` or `email`.
+- In the body section, write the write the update `name` or `age` or both of the user in json format.
 
 ---
 
