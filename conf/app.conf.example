@@ -1,0 +1,9 @@
+# appname = X
+# httpport = X
+# runmode = X
+# enabledocs = X
+
+# externalAPIBaseURL = X
+
+# [dev]
+# sqlconn = X
