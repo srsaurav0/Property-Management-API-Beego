@@ -2,6 +2,7 @@ package routers
 
 import (
 	"beego-api-service/controllers"
+	_ "beego-api-service/docs"
 
 	"github.com/beego/beego/v2/server/web"
 )
@@ -22,4 +23,6 @@ func init() {
 	)
 
 	web.AddNamespace(ns)
+
+	web.Router("/swagger/*", &controllers.SwaggerController{})
 }
