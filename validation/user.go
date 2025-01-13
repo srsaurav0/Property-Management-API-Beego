@@ -3,14 +3,27 @@ package validation
 import "fmt"
 
 type CreateUserRequest struct {
-	Name  string `json:"name" valid:"Required"`
-	Age   int    `json:"age" valid:"Required"`
+	// @Description The name of the user
+	// @Required
+	Name string `json:"name" valid:"Required"`
+	// @Description The age of the user
+	// @Required
+	// @Minimum 0
+	Age int `json:"age" valid:"Required"`
+	// @Description The email address of the user
+	// @Required
+	// @Pattern [a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}
 	Email string `json:"email" valid:"Required;Email"`
 }
 
 type UpdateUserRequest struct {
+	// @Description The name of the user
+	// @Required
 	Name string `json:"name,omitempty"`
-	Age  int    `json:"age,omitempty"`
+	// @Description The age of the user
+	// @Required
+	// @Minimum 0
+	Age int `json:"age,omitempty"`
 }
 
 // Validate CreateUserRequest
