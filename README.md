@@ -1,4 +1,4 @@
-# Beego API Service
+# Beego Property Management API Service
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -10,7 +10,7 @@
 ---
 
 ## Introduction
-Beego API Service is a web application built using the [Beego](https://beego.me/) framework. It provides APIs to manage property details, including fetching property information based on property ID.
+Beego Property Management API Service is a web application built using the [Beego](https://beego.me/) framework. It provides APIs to manage property details, including fetching property information based on property ID.
 
 ---
 
